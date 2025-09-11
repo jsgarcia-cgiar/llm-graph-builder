@@ -40,15 +40,15 @@ def get_s3_files_info(s3_url,aws_access_key_id=None,aws_secret_access_key=None):
     raise Exception(error_message)
 
 
-def get_s3_pdf_content(s3_url,aws_access_key_id=None,aws_secret_access_key=None):
+def get_s3_pdf_content(s3_url,aws_access_key_id=None,aws_secret_access_key=None,endpoint_url=None,bucket=None,):
     try:
       # Extract bucket name and directory from the S3 URL
         parsed_url = urlparse(s3_url)
-        bucket_name = parsed_url.netloc
+        bucket_name = bucket or parsed_url.netloc
         logging.info(f'bucket name : {bucket_name}')
         directory = parsed_url.path.lstrip('/')
         if directory.endswith('.pdf'):
-          loader=S3DirectoryLoader(bucket_name, prefix=directory,aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
+          loader=S3DirectoryLoader(bucket_name, prefix=directory,aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,endpoint_url=endpoint_url)
           pages = loader.load_and_split()
           return pages
         else:
@@ -59,18 +59,18 @@ def get_s3_pdf_content(s3_url,aws_access_key_id=None,aws_secret_access_key=None)
         raise Exception(e)
 
 
-def get_documents_from_s3(s3_url, aws_access_key_id, aws_secret_access_key):
+def get_documents_from_s3(s3_url, aws_access_key_id, aws_secret_access_key, endpoint_url=None, bucket=None):
     try:
       parsed_url = urlparse(s3_url)
-      bucket = parsed_url.netloc
+      bucket = bucket or parsed_url.netloc
       file_key = parsed_url.path.lstrip('/')
       file_name=file_key.split('/')[-1]
-      s3=boto3.client('s3',aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
+      s3=boto3.client('s3',endpoint_url=endpoint_url,aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
       response=s3.head_object(Bucket=bucket,Key=file_key)
       file_size=response['ContentLength']
       
       logging.info(f'bucket : {bucket},file_name:{file_name},  file key : {file_key},  file size : {file_size}')
-      pages=get_s3_pdf_content(s3_url,aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key)
+      pages=get_s3_pdf_content(s3_url,aws_access_key_id=aws_access_key_id,aws_secret_access_key=aws_secret_access_key,endpoint_url=endpoint_url,bucket=bucket)
       return file_name,pages
     except Exception as e:
       error_message = str(e)
