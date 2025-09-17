@@ -1,6 +1,5 @@
 import logging
 from graphdatascience import GraphDataScience
-from src.llm import get_llm
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser 
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -249,6 +248,8 @@ def write_communities(gds, graph_project, project_name=COMMUNITY_PROJECTION_NAME
 
 def get_community_chain(model, is_parent=False,community_template=COMMUNITY_TEMPLATE,system_template=COMMUNITY_SYSTEM_TEMPLATE):
     try:
+        # Lazy import to avoid importing heavy LLM providers at module import time
+        from src.llm import get_llm
         if is_parent:
             community_template=PARENT_COMMUNITY_TEMPLATE
             system_template= PARENT_COMMUNITY_SYSTEM_TEMPLATE

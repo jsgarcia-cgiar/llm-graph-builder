@@ -8,7 +8,6 @@ from langchain_google_vertexai import HarmBlockThreshold, HarmCategory
 from langchain_experimental.graph_transformers.diffbot import DiffbotGraphTransformer
 from langchain_experimental.graph_transformers import LLMGraphTransformer
 from langchain_anthropic import ChatAnthropic
-from langchain_fireworks import ChatFireworks
 from langchain_aws import ChatBedrock
 from langchain_community.chat_models import ChatOllama
 import boto3
@@ -80,6 +79,8 @@ def get_llm(model: str):
             )
 
         elif "fireworks" in model:
+            # Lazy import to avoid loading fireworks protobufs unless needed
+            from langchain_fireworks import ChatFireworks
             model_name, api_key = env_value.split(",")
             llm = ChatFireworks(api_key=api_key, model=model_name)
 
