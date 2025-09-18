@@ -85,11 +85,15 @@ def load_embedding_model(embedding_model_name: str):
         dimension = 1536
         logging.info(f"Embedding: Using bedrock titan Embeddings , Dimension:{dimension}")
     else:
+        # For any other value, treat it as a Hugging Face sentence-transformer model name.
+        # If empty/None, default to "all-MiniLM-L6-v2".
+        model_name = embedding_model_name or "all-MiniLM-L6-v2"
         embeddings = HuggingFaceEmbeddings(
-            model_name="all-MiniLM-L6-v2"#, cache_folder="/embedding_model"
+            model_name=model_name# , cache_folder="/embedding_model"
         )
+        # Dimension varies by HF model; keep 384 as a safe default for MiniLM.
         dimension = 384
-        logging.info(f"Embedding: Using Langchain HuggingFaceEmbeddings , Dimension:{dimension}")
+        logging.info(f"Embedding: Using Langchain HuggingFaceEmbeddings model '{model_name}' , Dimension:{dimension}")
     return embeddings, dimension
 
 def save_graphDocuments_in_neo4j(graph: Neo4jGraph, graph_document_list: List[GraphDocument], max_retries=3, delay=1):
